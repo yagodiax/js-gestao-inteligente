@@ -5,21 +5,20 @@ $w.onReady(function () {
     if (wixUsers.currentUser.loggedIn) {
         checkIfMemberHasStore();
     }
+    checkStoreStatus();
     $w("#button1").onClick(() => {
-        $w("#statusMessage").text = "Aguarde..."; 
         saveChangesAndSubmit();
     });
 });
 
 function checkIfMemberHasStore() {
     const userId = wixUsers.currentUser.id;
-    wixData.query("LOJASOLICITACAO")
+    wixData.query("Lojas")
         .eq("_owner", userId)
         .find()
         .then((results) => {
             if (results.items.length > 0) {
                 console.log("Usuário já possui uma loja.");
-                $w("#statusMessage").text = "Você já possui uma loja.";
             } else {
                 createNewStore(userId);
             }
@@ -32,14 +31,36 @@ function checkIfMemberHasStore() {
 function createNewStore(userId) {
     const newStore = {
         _owner: userId,
-        solicitacao: true 
     };
-    wixData.insert("LOJASOLICITACAO", newStore)
+    wixData.insert("Lojas", newStore)
         .then((result) => {
             console.log("Loja criada com sucesso:", result);
+            window.location.reload(); 
         })
         .catch((err) => {
             console.error("Erro ao criar loja:", err);
+        });
+}
+
+function checkStoreStatus() {
+    const userId = wixUsers.currentUser.id;
+    wixData.query("Lojas")
+        .eq("_owner", userId)
+        .find()
+        .then((results) => {
+            if (results.items.length > 0) {
+                const item = results.items[0];
+                if (item.solicitacao === false && item.aprovacao === false) {
+                    $w("#status").text = "Por favor, envie os dados da loja.";
+                } else if (item.aprovacao === true) {
+                    $w("#status").text = "A Loja foi aprovada e está publicada.";
+                } else if (item.solicitacao === true) {
+                    $w("#status").text = "Aguarde a Aprovação.";
+                }
+            }
+        })
+        .catch((err) => {
+            console.error("Erro ao verificar o status da loja:", err);
         });
 }
 
@@ -48,21 +69,25 @@ function saveChangesAndSubmit() {
     dataset.save()
         .then(() => {
             const userId = wixUsers.currentUser.id;
-            wixData.query("LOJASOLICITACAO")
+            wixData.query("Lojas")
                 .eq("_owner", userId)
                 .find()
                 .then((results) => {
                     if (results.items.length > 0) {
                         const item = results.items[0];
-                        item.solicitacao = true; 
-                        wixData.update("LOJASOLICITACAO", item)
-                            .then(() => {
-                                $w("#statusMessage").text = "Dados enviados e solicitação marcada com sucesso!";
-                            })
-                            .catch((err) => {
-                                console.error("Erro ao atualizar a solicitação da loja:", err);
-                                $w("#statusMessage").text = "Erro ao enviar os dados e marcar a solicitação."; 
-                            });
+                        if (!item.solicitacao) {
+                            item.solicitacao = true; 
+                            wixData.update("Lojas", item)
+                                .then(() => {
+                                    $w("#status").text = "Dados enviados com sucesso, Aguarde a Aprovação!";
+                                })
+                                .catch((err) => {
+                                    console.error("Erro ao atualizar a solicitação da loja:", err);
+                                    $w("#status").text = "Erro ao enviar dados.";
+                                });
+                        } else {
+                            $w("#status").text = "Os dados ja foram Enviados.";
+                        }
                     }
                 })
                 .catch((err) => {
@@ -71,6 +96,6 @@ function saveChangesAndSubmit() {
         })
         .catch((err) => {
             console.error("Erro ao salvar alterações no dataset:", err);
-            $w("#statusMessage").text = "Erro ao enviar os dados."; 
+            $w("#status").text = "Erro ao enviar os dados.";
         });
 }
