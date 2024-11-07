@@ -35,7 +35,7 @@ function createNewStore(userId) {
     wixData.insert("Lojas", newStore)
         .then((result) => {
             console.log("Loja criada com sucesso:", result);
-            window.location.reload(); 
+            location.reload();
         })
         .catch((err) => {
             console.error("Erro ao criar loja:", err);
@@ -76,7 +76,8 @@ function saveChangesAndSubmit() {
                     if (results.items.length > 0) {
                         const item = results.items[0];
                         if (!item.solicitacao) {
-                            item.solicitacao = true; 
+                            item.solicitacao = true;
+                            item.aprovacao = false;
                             wixData.update("Lojas", item)
                                 .then(() => {
                                     $w("#status").text = "Dados enviados com sucesso, Aguarde a Aprovação!";
@@ -86,7 +87,7 @@ function saveChangesAndSubmit() {
                                     $w("#status").text = "Erro ao enviar dados.";
                                 });
                         } else {
-                            $w("#status").text = "Os dados ja foram Enviados.";
+                            $w("#status").text = "Os dados já foram Enviados.";
                         }
                     }
                 })
