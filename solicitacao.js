@@ -3,7 +3,7 @@ import wixLocation from 'wix-location';
 
 $w.onReady(function () {
     $w("#btnAprovar").onClick(() => {
-        const item = $w("#dynamicDataset").getCurrentItem(); 
+        const item = $w("#dynamicDataset").getCurrentItem();
         if (item) {
             approveItem(item);
         } else {
@@ -12,7 +12,7 @@ $w.onReady(function () {
     });
 
     $w("#btnReprovar").onClick(() => {
-        const item = $w("#dynamicDataset").getCurrentItem(); 
+        const item = $w("#dynamicDataset").getCurrentItem();
         if (item) {
             rejectItem(item._id);
         } else {
@@ -23,7 +23,7 @@ $w.onReady(function () {
 
 function approveItem(item) {
     wixData.query("Lojas")
-        .eq("_id", item._id) 
+        .eq("_id", item._id)
         .find()
         .then((results) => {
             if (results.items.length > 0) {
@@ -36,7 +36,7 @@ function approveItem(item) {
                 wixData.update("Lojas", updatedItem)
                     .then(() => {
                         showNotification("Loja aprovada com sucesso!");
-                        wixLocation.to("/solicitações"); 
+                        wixLocation.to("/solicitações");
                     })
                     .catch((err) => {
                         showNotification("Erro ao atualizar a loja: " + err);
