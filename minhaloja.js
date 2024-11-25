@@ -76,7 +76,7 @@ function saveChangesAndSubmit() {
                     if (results.items.length > 0) {
                         const item = results.items[0];
                         if (!item.solicitacao) {
-                            item.solicitacao = true;
+                            item.solicitacao = true; // Atualiza o campo solicitacao para true
                             item.aprovacao = false;
                             wixData.update("Lojas", item)
                                 .then(() => {
